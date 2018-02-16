@@ -19,12 +19,17 @@
 				<paper-autocomplete-chips></paper-autocomplete-chips>
 			</template>
 		</test-fixture>
+		<test-fixture id="objects">
+			<template>
+				<paper-autocomplete-chips text-property="label"></paper-autocomplete-chips>
+			</template>
+		</test-fixture>
 		<script>
 			suite('defaults', function () {
 				let chips,
 					ac,
 					sug;
-			
+
 				const select = value => {
 						// Set input value
 						ac.text = value.toString();
@@ -33,7 +38,7 @@
 						// Select first result
 						sug._selection(0);
 					},
-			
+
 					selectObj = obj => {
 						select(chips.get(chips.textProperty, obj));
 					};
@@ -111,6 +116,81 @@
 					selectObj(chips.source[3]);
 					assert.deepEqual(chips.selectedItems, [chips.source[1], chips.source[3]]);
 
+					done();
+				});
+			});
+			suite('objects', function () {
+				let chips,
+					ac,
+					sug;
+
+				const select = value => {
+						// Set input value
+					ac.text = value.toString();
+						// Trigger create suggestions
+					sug._input.fire('keyup');
+						// Select first result
+					sug._selection(0);
+				};
+
+				setup(function (done) {
+					chips = fixture('objects');
+					ac = chips.$.ac;
+					sug = ac.$.paperAutocompleteSuggestions;
+					Polymer.Base.async(function () {
+						done();
+					});
+				});
+
+				test('instantiates a paper-autocomplete-chips instance', function (done) {
+					assert.equal(chips.is, 'paper-autocomplete-chips');
+					done();
+				});
+
+				test('Selecting objects with string value', function (done) {
+					chips.source = [{
+						id: 'one',
+						label: 'Olive'
+					}, {
+						id: 'two',
+						label: 'Blue'
+					}, {
+						id: 'three',
+						label: 'Green'
+					}, {
+						id: 'four',
+						label: 'Yellow'
+					}, {
+						id: 'five',
+						label: 'White'
+					}, {
+						id: 'six',
+						label: 'Black'
+					}];
+
+					select('Green');
+					assert.deepEqual(chips.selectedItems, [{id: 'three', label: 'Green'}]);
+
+					select('Blue');
+					assert.deepEqual(chips.selectedItems, [{id: 'three', label: 'Green'}, {id: 'two', label: 'Blue'}]);
+
+					done();
+				});
+
+				test('Selecting objects with integer values', function (done) {
+					chips.textProperty = 'text';
+					chips.source = [
+						{ value: 1, text: 'a', data: '1a'},
+						{ value: 2, text: 'b', data: '2b'},
+						{ value: 3, text: 'c', data: '3c'},
+						{ value: 4, text: 'a', data: '4a'}
+					];
+
+					select('c');
+					assert.deepEqual(chips.selectedItems, [{ value: 3, text: 'c', data: '3c'}]);
+
+					select('a');
+					assert.deepEqual(chips.selectedItems, [{ value: 3, text: 'c', data: '3c'}, { value: 1, text: 'a', data: '1a'}]);
 					done();
 				});
 			});
